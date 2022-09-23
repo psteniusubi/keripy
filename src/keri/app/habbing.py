@@ -455,7 +455,8 @@ class Habery:
         return hab
 
     def makeGroupHab(self, group, phab, **kwa):
-        """Make new Group Hab with name using pre from hab as local identifier, pre is generated from **kwa
+        """Make new Group Hab with name using pre from hab as local identifier,
+        pre is generated from **kwa
 
         Parameters: (Passthrough to hab.make)
             group (str): human readable alias for group identifier
@@ -474,7 +475,8 @@ class Habery:
             delpre (str): qb64 of delegator identifier prefix
             estOnly (str): eventing.TraitCodex.EstOnly means only establishment
                 events allowed in KEL for this Hab
-        """
+            DnD (bool): eventing.TraitCodex.DnD means do allow delegated identifiers from this identifier
+       """
         aids = list(kwa['aids'])
         del kwa['aids']
         if phab.pre not in aids:
@@ -782,6 +784,8 @@ class Hab:
         rvy (routing.Revery): factory that processes reply 'rpy' messages
         kvy (eventing.Kevery): factory for local processing of local event msgs
         psr (parsing.Parser):  parses local messages for .kvy .rvy
+        phab Hab): Group participant hab if this is a group multisig identifier
+        aids (list): AID prefixes of group participants
 
      Attributes:
         name (str): alias of controller
@@ -815,10 +819,12 @@ class Hab:
             kvy (eventing.Kevery): factory for local processing of local event msgs
             psr (parsing.Parser):  parses local messages for .kvy .rvy
 
+
         Parameters:
             name (str): alias name for local controller of habitat
             pre (str): qb64 identifier prefix of own local controller else None
             phab (Hab): Group participant hab if this is a group multisig identifier
+            aids (list): AID prefixes of group participants
             temp (bool): True means testing:
                 use weak level when salty algo for stretching in key creation
                 for incept and rotate of keys for this hab.pre
@@ -846,8 +852,8 @@ class Hab:
         self.delpre = None
 
     def make(self, *, secrecies=None, iridx=0, code=coring.MtrDex.Blake3_256, transferable=True, isith=None, icount=1,
-             nsith=None, ncount=None, toad=None, wits=None, delpre=None, estOnly=False, mskeys=None, msdigers=None,
-             hidden=False):
+             nsith=None, ncount=None, toad=None, wits=None, delpre=None, estOnly=False, DnD=False,
+             mskeys=None, msdigers=None, hidden=False):
         """
         Finish setting up or making Hab from parameters.
         Assumes injected dependencies were already setup.
@@ -865,8 +871,9 @@ class Hab:
             toad (Union[int,str]): int or str hex of witness threshold
             wits (list): of qb64 prefixes of witnesses
             delpre (str): qb64 of delegator identifier prefix
-            estOnly (str): eventing.TraitCodex.EstOnly means only establishment
+            estOnly (bool): eventing.TraitCodex.EstOnly means only establishment
                 events allowed in KEL for this Hab
+            DnD (bool): eventing.TraitCodex.DnD means do allow delegated identifiers from this identifier
             mskeys (list): Verfers of public keys collected from inception of participants in group identifier
             msdigers (list): Digers of next public keys collected from inception of participants in group identifier
             hidden (bool): A hidden Hab is not included in the list of Habs.
@@ -912,6 +919,8 @@ class Hab:
         cnfg = []
         if estOnly:
             cnfg.append(eventing.TraitCodex.EstOnly)
+        if DnD:
+            cnfg.append(eventing.TraitCodex.DND)
 
         self.delpre = delpre
         keys = [verfer.qb64 for verfer in verfers]
@@ -1080,7 +1089,8 @@ class Hab:
         if self.phab:
             keys = [verfer.qb64 for verfer in self.kever.verfers]
             idx = keys.index(self.phab.kever.verfers[0].qb64)
-            return self.phab.mgr.sign(ser, pubs=pubs, verfers=self.phab.kever.verfers, indexed=indexed, indices=[idx])
+            return self.phab.mgr.sign(ser, pubs=pubs, verfers=self.phab.kever.verfers,
+                                      indexed=indexed, indices=[idx])
         else:
             if verfers is None:
                 verfers = self.kever.verfers
@@ -1157,7 +1167,8 @@ class Hab:
 
         if self.phab:
             idx = keys.index(self.phab.kever.verfers[0].qb64)
-            sigers = self.phab.mgr.sign(ser=serder.raw, verfers=self.phab.kever.verfers, indices=[idx])
+            sigers = self.phab.mgr.sign(ser=serder.raw, verfers=self.phab.kever.verfers,
+                                        indices=[idx])
         else:
             sigers = self.sign(ser=serder.raw, verfers=verfers)
 
@@ -1305,10 +1316,6 @@ class Hab:
             # create SealEvent or SealLast for endorser's est evt whose keys are
             # used to sign
             kever = self.kever
-            # if not self.phab:
-            #     kever = self.kever
-            # else:  # group so use gid kever
-            #     kever = self.phab.kever
 
             if last:
                 seal = eventing.SealLast(i=kever.prefixer.qb64)

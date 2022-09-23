@@ -15,11 +15,11 @@ from hio.help import decking
 
 from . import coring
 from .coring import (versify, Serials, Ilks, MtrDex, NonTransDex, CtrDex, Counter,
-                     Number, Seqner, Siger, Cigar, Dater,
+                     Number, Seqner, Siger, Cigar, Dater, Indexer, IdrDex,
                      Verfer, Diger, Prefixer, Nexter, Serder, Tholder, Saider)
 from .. import help
 from .. import kering
-from ..db import basing
+from ..db import basing, dbing
 from ..db.dbing import dgKey, snKey, fnKey, splitKeySN, splitKey
 from ..help import helping
 from ..kering import (MissingEntryError,
@@ -366,6 +366,7 @@ def deTransReceiptQuadruple(data, strip=False):
     if not strip:
         data = data[len(saider.qb64b):]
     siger = Siger(qb64b=data, strip=strip)
+
     return (prefixer, seqner, saider, siger)
 
 
@@ -401,6 +402,7 @@ def deTransReceiptQuintuple(data, strip=False):
     if not strip:
         data = data[len(ssaider.qb64b):]
     siger = Siger(qb64b=data, strip=strip)  # indexed siger of event
+
     return esaider, sprefixer, sseqner, ssaider, siger
 
 
@@ -953,8 +955,10 @@ def receipt(pre,
             kind=Serials.json
             ):
     """
-    Returns serder of event receipt message for non-transferable receipter prefix.
-    Utility function to automate creation of interaction events.
+    Returns serder of event receipt message. Used for both non-trans and trans
+    signers as determined by signature attachment type (cigar or siger)
+
+    Utility function to automate creation of receipts.
 
      Parameters:
         pre is qb64 str of prefix of event being receipted
@@ -1350,7 +1354,7 @@ def messagize(serder, *, sigers=None, seal=None, wigers=None, cigars=None,
     Returns: bytearray KERI event message
     """
     msg = bytearray(serder.raw)  # make copy into new bytearray so can be deleted
-    atc = bytearray()
+    atc = bytearray()  # attachment
 
     if not (sigers or cigars or wigers):
         raise ValueError("Missing attached signatures on message = {}."
@@ -5342,3 +5346,90 @@ class Kevery:
 
         """
         pass
+
+
+def loadEvent(db, preb, dig):
+    """ Load event details from database
+
+    Args:
+        db (Baser): database to load event fro,
+        preb (bytes): qb64b identifier prefix
+        dig (bytes): digest of event to load
+
+    Returns:
+        dict: data from event
+
+    """
+    event = dict()
+    dgkey = dbing.dgKey(preb, dig)  # get message
+    if not (raw := db.getEvt(key=dgkey)):
+        raise ValueError("Missing event for dig={}.".format(dig))
+
+    serder = coring.Serder(raw=bytes(raw))
+    event["ked"] = serder.ked
+
+    sn = serder.sn
+    sdig = db.getKeLast(key=dbing.snKey(pre=preb,
+                                        sn=sn))
+    if sdig is not None:
+        event["stored"] = True
+
+    # add indexed signatures to attachments
+    sigs = db.getSigs(key=dgkey)
+    dsigs = []
+    for s in sigs:
+        sig = coring.Siger(qb64b=bytes(s))
+        dsigs.append(dict(index=sig.index, signature=sig.qb64))
+    event["signatures"] = dsigs
+
+    # add witness state at this event
+    wits = db.wits.get(dgkey) if serder.est else []
+    event["witnesses"] = [wit.qb64 for wit in wits]
+
+    # add indexed witness signatures to attachments
+    dwigs = []
+    if wigs := db.getWigs(key=dgkey):
+        for w in wigs:
+            sig = coring.Siger(qb64b=bytes(w))
+            dwigs.append(dict(index=sig.index, signature=sig.qb64))
+    event["witness_signatures"] = dwigs
+
+    # add authorizer (delegator/issuer) source seal event couple to attachments
+    couple = db.getAes(dgkey)
+    if couple is not None:
+        raw = bytearray(couple)
+        seqner = coring.Seqner(qb64b=raw, strip=True)
+        saider = coring.Saider(qb64b=raw)
+        event["source_seal"] = dict(sequence=seqner.sn, said=saider.qb64)
+
+    receipts = dict()
+    # add trans receipts quadruples
+    if quads := db.getVrcs(key=dgkey):
+        trans = []
+        for quad in quads:
+            raw = bytearray(quad)
+            trans.append(dict(
+                prefix=coring.Prefixer(qb64b=raw, strip=True).qb64,
+                sequence=coring.Seqner(qb64b=raw, strip=True).qb64,
+                said=coring.Saider(qb64b=raw, strip=True).qb64,
+                signature=coring.Siger(qb64b=raw, strip=True).qb64,
+            ))
+
+        receipts["transferable"] = trans
+
+    # add nontrans receipts couples
+    if coups := db.getRcts(key=dgkey):
+        nontrans = []
+        for coup in coups:
+            raw = bytearray(coup)
+            (prefixer, cigar) = deReceiptCouple(raw, strip=True)
+            nontrans.append(dict(prefix=prefixer.qb64, signature=cigar.qb64))
+        receipts["nontransferable"] = nontrans
+
+    event["receipts"] = receipts
+    # add first seen replay couple to attachments
+    if not (dts := db.getDts(key=dgkey)):
+        raise ValueError("Missing datetime for dig={}.".format(dig))
+
+    event["timestamp"] = coring.Dater(dts=bytes(dts)).dts
+    return event

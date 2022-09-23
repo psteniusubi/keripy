@@ -9,8 +9,9 @@ import logging
 from collections import namedtuple
 from dataclasses import dataclass, astuple
 
-from .coring import (Ilks, CtrDex, Counter, Seqner, Siger, Cigar, Dater, Verfer,
-                     Prefixer, Serder, Saider, Pather, Idents, Sadder)
+from .coring import (Ilks, CtrDex, Counter, Seqner, Siger, Cigar, IdxSigDex,
+                     Dater, Verfer, Prefixer, Serder, Saider, Pather, Idents,
+                     Sadder, )
 from .. import help
 from .. import kering
 from ..vc.proving import Creder
@@ -285,11 +286,11 @@ class Parser:
                                                 klas=Saider,
                                                 cold=cold,
                                                 abort=pipelined)
-            ictr = ctr = yield from self._extractor(ims=ims,
+            ictr = yield from self._extractor(ims=ims,
                                                     klas=Counter,
                                                     cold=cold,
                                                     abort=pipelined)
-            if ctr.code != CtrDex.ControllerIdxSigs:
+            if ictr.code != CtrDex.ControllerIdxSigs:
                 raise kering.UnexpectedCountCodeError("Wrong "
                                                       "count code={}.Expected code={}."
                                                       "".format(ictr.code, CtrDex.ControllerIdxSigs))
@@ -302,6 +303,7 @@ class Parser:
                 isigers.append(isiger)
 
             yield prefixer, seqner, saider, isigers
+
 
     def _nonTransReceiptCouples(self, ctr, ims, cold=Colds.txt, pipelined=False):
         """
@@ -789,7 +791,10 @@ class Parser:
                         # extract attached rct couplets into list of sigvers
                         # verfer property of cigar is the identifier prefix
                         # cigar itself has the attached signature
-                        for cigar in self._nonTransReceiptCouples(ctr=ctr, ims=ims, cold=cold, pipelined=pipelined):
+                        for cigar in self._nonTransReceiptCouples(ctr=ctr,
+                                                                  ims=ims,
+                                                                  cold=cold,
+                                                        pipelined=pipelined):
                             cigars.append(cigar)
 
                     elif ctr.code == CtrDex.TransReceiptQuadruples:
@@ -799,6 +804,7 @@ class Parser:
                         # ssnu is sn of signer's est evt when signed
                         # sdig is dig of signer's est event when signed
                         # sig is indexed signature of signer on this event msg
+
                         for i in range(ctr.count):  # extract each attached quadruple
                             prefixer = yield from self._extractor(ims,
                                                                   klas=Prefixer,
@@ -826,8 +832,9 @@ class Parser:
                         # dig is dig of signer's est event when signed
                         # followed by counter for ControllerIdxSigs with attached
                         # indexed sigs from trans signer (endorser).
-                        for (prefixer, seqner, saider, isigers) in self._transIdxSigGroups(ctr, ims, cold=cold,
-                                                                                           pipelined=pipelined):
+                        for (prefixer, seqner, saider, isigers) in \
+                                self._transIdxSigGroups(ctr, ims, cold=cold,
+                                                        pipelined=pipelined):
                             tsgs.append((prefixer, seqner, saider, isigers))
 
                     elif ctr.code == CtrDex.TransLastIdxSigGroups:
@@ -841,11 +848,11 @@ class Parser:
                                                                   klas=Prefixer,
                                                                   cold=cold,
                                                                   abort=pipelined)
-                            ictr = ctr = yield from self._extractor(ims=ims,
+                            ictr = yield from self._extractor(ims=ims,
                                                                     klas=Counter,
                                                                     cold=cold,
                                                                     abort=pipelined)
-                            if ctr.code != CtrDex.ControllerIdxSigs:
+                            if ictr.code != CtrDex.ControllerIdxSigs:
                                 raise kering.UnexpectedCountCodeError("Wrong "
                                                                       "count code={}.Expected code={}."
                                                                       "".format(ictr.code, CtrDex.ControllerIdxSigs))
