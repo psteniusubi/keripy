@@ -1,17 +1,17 @@
 {
-  "dt": "2022-01-20T12:57:59.823350+00:00",
+  "dt": "2022-01-20T14:57:59.82335+02:00",
   "iurls": [
     "http://127.0.0.1:5642/oobi/BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha/controller",
     "http://127.0.0.1:5644/oobi/BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX/controller",
     "http://127.0.0.1:5643/oobi/BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM/controller"
   ],
   "durls": [
-    "http://127.0.0.1:7723/oobi/EEbzE2NuU67N-Rr35Wh5-_-ClsH-iGSa-C93F-q5H0dO",
-    "http://127.0.0.1:7723/oobi/EIYLQF3I-5oCxmrGmR6Kf7iESM3BhNsYoQzSkqzDc72r",
-    "http://127.0.0.1:7723/oobi/EFJVH1wvDaJfadZSqj_JLS6NlDzMO1slBtoyV2D9HLrW",
-    "http://127.0.0.1:7723/oobi/EDM9E_arYaIBSCJc1AK4alHW53_wWav9iEEcZ-ryQ373",
-    "http://127.0.0.1:7723/oobi/EDdHGfr-aMI1cbsPAepw_xzRdahOkeFeZin1EIeMhq7Z",
-    "http://127.0.0.1:7723/oobi/EE4R4HtygsIDdW-XJiA3CJEs5Yrb2eK5YeohAy_rdyZB",
-    "http://127.0.0.1:7723/oobi/ECjmi4aPyB7Q9uOHV8EaovisNwmgF8PO-_sPQnxrKLvD"
+    "http://127.0.0.1:7723/oobi/ED_PcIn1wFDe0GB0W7Bk9I4Q_c9bQJZCM2w7Ex9Plsta",
+    "http://127.0.0.1:7723/oobi/EOhcE9MV90LRygJuYN1N0c5XXNFkzwFxUBfQ24v7qeEY",
+    "http://127.0.0.1:7723/oobi/EIL-RWno8cEnkGTi9cr7-PFg_IXTPx9fZ0r9snFFZ0nm",
+    "http://127.0.0.1:7723/oobi/EK0jwjJbtYLIynGtmXXLO5MGJ7BDuX2vr2_MhM9QjAxZ",
+    "http://127.0.0.1:7723/oobi/EDqjl80uP0r_SNSp-yImpLGglTEbOwgO77wsOPjyRVKy",
+    "http://127.0.0.1:7723/oobi/ELqriXX1-lbV9zgXP4BXxqJlpZTgFchll3cyjaCyVKiz",
+    "http://127.0.0.1:7723/oobi/EFMLWfza4xWres1TtEttZEvcPg3J3zoqostIDx2BAP0v"
   ]
 }
