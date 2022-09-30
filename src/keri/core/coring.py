@@ -3430,7 +3430,7 @@ class Saider(Matter):
             ignore (list): fields to ignore when generating SAID
 
         """
-        if label not in sad:
+        if not sad or label not in sad:
             raise KeyError("Missing id field labeled={} in sad.".format(label))
         raw, sad = clas._derive(sad=sad, code=code, kind=kind, label=label, ignore=ignore)
         saider = clas(raw=raw, code=code, kind=kind, label=label, ignore=ignore, **kwa)

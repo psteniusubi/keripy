@@ -1,5 +1,5 @@
 {
-  "dt": "2022-01-20T14:57:59.82335+02:00",
+  "dt": "2022-01-20T12:57:59+00:00",
   "iurls": [
     "http://127.0.0.1:5642/oobi/BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha/controller",
     "http://127.0.0.1:5643/oobi/BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM/controller",
@@ -9,11 +9,11 @@
   ],
   "durls": [
     "http://127.0.0.1:7723/oobi/ED_PcIn1wFDe0GB0W7Bk9I4Q_c9bQJZCM2w7Ex9Plsta",
-    "http://127.0.0.1:7723/oobi/EOhcE9MV90LRygJuYN1N0c5XXNFkzwFxUBfQ24v7qeEY",
+    "http://127.0.0.1:7723/oobi/EB9JT6n1lkMGWlUTzYtPnVbknHr85BG-N_vEpqnfN4dM",
     "http://127.0.0.1:7723/oobi/EIL-RWno8cEnkGTi9cr7-PFg_IXTPx9fZ0r9snFFZ0nm",
     "http://127.0.0.1:7723/oobi/EK0jwjJbtYLIynGtmXXLO5MGJ7BDuX2vr2_MhM9QjAxZ",
     "http://127.0.0.1:7723/oobi/EDqjl80uP0r_SNSp-yImpLGglTEbOwgO77wsOPjyRVKy",
     "http://127.0.0.1:7723/oobi/ELqriXX1-lbV9zgXP4BXxqJlpZTgFchll3cyjaCyVKiz",
-    "http://127.0.0.1:7723/oobi/EF4FrvgBMeHgLiKRYbHM-kcyvMtwieThIHU-s9cZHFre"
+    "http://127.0.0.1:7723/oobi/EIN1yiBxZ7IxdY4gFGuTYyFV340XcksRxqRXUphZCPrt"
   ]
 }
