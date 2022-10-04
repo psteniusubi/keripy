@@ -204,7 +204,10 @@ class Respondant(doing.DoDoer):
                     self.mbx.storeMsg(topic=recipient, msg=msg)
                 else:
                     wit = random.choice(recpkev.wits)
-                    client, clientDoer = agenting.httpClient(senderHab, wit)
+                    try:
+                        client, clientDoer = agenting.httpClient(senderHab, wit)
+                    except kering.MissingEntryError:
+                        continue
 
                     self.extend([clientDoer])
 
@@ -301,7 +304,10 @@ class Respondant(doing.DoDoer):
                         msg = hab.endorse(fwd, last=True, pipelined=False)
                         msg.extend(atc)
                         wit = random.choice(kever.wits)
-                        client, clientDoer = agenting.httpClient(hab, wit)
+                        try:
+                            client, clientDoer = agenting.httpClient(hab, wit)
+                        except kering.MissingEntryError:
+                            continue
                         self.extend([clientDoer])
 
                         httping.createCESRRequest(msg, client)

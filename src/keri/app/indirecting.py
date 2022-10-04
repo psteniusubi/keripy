@@ -783,7 +783,10 @@ class Poller(doing.DoDoer):
 
         while self.retry > 0:
             self.retry = 0
-            client, clientDoer = agenting.httpClient(self.hab, self.witness)
+            try:
+                client, clientDoer = agenting.httpClient(self.hab, self.witness)
+            except kering.MissingEntryError:
+                break
             self.extend([clientDoer])
 
             topics = dict()

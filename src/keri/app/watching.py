@@ -150,7 +150,10 @@ class WatcherClientRotateDoer(doing.DoDoer):
                                          kind=None)
                 headers = ending.signature([signage])
 
-                client, clientDoer = agenting.httpClient(self.hab, watcher)
+                try:
+                    client, clientDoer = agenting.httpClient(self.hab, watcher)
+                except kering.MissingEntryError:
+                    return
                 self.extend([clientDoer])
 
                 client.request(method="POST", path="/rotate", headers=headers, body=raw)
