@@ -3,9 +3,7 @@
   "iurls": [
     "http://127.0.0.1:5642/oobi/BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha/controller",
     "http://127.0.0.1:5643/oobi/BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM/controller",
-    "http://127.0.0.1:5644/oobi/BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX/controller",
-    "http://127.0.0.1:7723/.well-known/keri/oobi/gleif-external?name=GLEIF%20External",
-    "http://127.0.0.1:7723/.well-known/keri/oobi/gleif-internal?name=GLEIF%20Internal"
+    "http://127.0.0.1:5644/oobi/BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX/controller"
   ],
   "durls": [
     "http://127.0.0.1:7723/oobi/EB9JT6n1lkMGWlUTzYtPnVbknHr85BG-N_vEpqnfN4dM",
