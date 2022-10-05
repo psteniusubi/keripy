@@ -592,7 +592,7 @@ class IdentifierEnd(doing.DoDoer):
             adds = set(wits) - set(ewits)
 
         try:
-            rot = hab.rotate(sith=isith, count=count, toad=toad, cuts=list(cuts), adds=list(adds), data=data)
+            rot = hab.rotate(isith=isith, count=count, toad=toad, cuts=list(cuts), adds=list(adds), data=data)
             self.cues.append(dict(pre=hab.pre))
 
             serder = coring.Serder(raw=rot)
@@ -2347,6 +2347,12 @@ class MultisigEventEnd(MultisigEndBase):
             if isinstance(isith, str) and "," in isith:
                 isith = isith.split(",")
 
+        nsith = None
+        if "nsith" in body:
+            nsith = body["nsith"]
+            if isinstance(nsith, str) and "," in nsith:
+                nsith = nsith.split(",")
+
         aids = body["aids"] if "aids" in body else ghab.gaids
         toad = body["toad"] if "toad" in body else None
         wits = body["wits"] if "wits" in body else []
@@ -2368,7 +2374,8 @@ class MultisigEventEnd(MultisigEndBase):
 
         sn = ghab.kever.sn
         # begin the rotation process
-        self.counselor.rotate(ghab=ghab, aids=aids, sith=isith, toad=toad, cuts=list(cuts), adds=list(adds), data=data)
+        self.counselor.rotate(ghab=ghab, aids=aids, isith=isith, nsith=nsith,
+                              toad=toad, cuts=list(cuts), adds=list(adds), data=data)
 
         # Create `exn` peer to peer message to notify other participants UI
         exn, atc = grouping.multisigRotateExn(ghab, aids, isith, toad, cuts, adds, data)
@@ -2464,6 +2471,12 @@ class MultisigEventEnd(MultisigEndBase):
             if isinstance(isith, str) and "," in isith:
                 isith = isith.split(",")
 
+        nsith = None
+        if "nsith" in body:
+            nsith = body["nsith"]
+            if isinstance(nsith, str) and "," in nsith:
+                nsith = nsith.split(",")
+
         aids = body["aids"] if "aids" in body else ghab.gaids
         toad = body["toad"] if "toad" in body else None
         wits = body["wits"] if "wits" in body else []
@@ -2484,7 +2497,8 @@ class MultisigEventEnd(MultisigEndBase):
             adds = set(wits) - set(ewits)
 
         sn = ghab.kever.sn
-        self.counselor.rotate(ghab=ghab, aids=aids, sith=isith, toad=toad, cuts=list(cuts), adds=list(adds), data=data)
+        self.counselor.rotate(ghab=ghab, aids=aids, isith=isith, nsith=nsith,
+                              toad=toad, cuts=list(cuts), adds=list(adds), data=data)
 
         # cue up an event to send notification when complete
         self.evts.append(dict(r="/rot/complete", i=ghab.pre, s=sn))
