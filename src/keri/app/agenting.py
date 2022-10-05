@@ -593,7 +593,7 @@ def httpClient(hab, wit):
     """
     urls = hab.fetchUrls(eid=wit, scheme=kering.Schemes.http)
     if not urls:
-        raise kering.MissingEntryError(f"unable to query witness {wit}, no http endpoint")
+        logger.error(f"unable to query witness {wit}, no http endpoint")
 
     up = urlparse(urls[kering.Schemes.http])
     client = http.clienting.Client(hostname=up.hostname, port=up.port)
