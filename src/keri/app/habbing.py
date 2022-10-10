@@ -13,15 +13,15 @@ from hio.base import doing
 from hio.core import wiring
 from hio.core.tcp import clienting, serving
 from hio.help import hicting
+from keri.peer import exchanging
 
-from . import keeping, configing, directing, signing
+from . import keeping, configing, directing
 from .. import help
 from .. import kering
 from ..core import coring, eventing, parsing, routing
 from ..core.coring import Serder
 from ..db import dbing, basing
-from ..db.dbing import snKey, dgKey
-from ..kering import ValidationError, MissingSignatureError
+from ..kering import MissingSignatureError
 
 logger = help.ogler.getLogger()
 
@@ -296,9 +296,10 @@ class Habery:
         self.mgr = None  # wait to setup until after ks is known to be opened
         self.rtr = routing.Router()
         self.rvy = routing.Revery(db=self.db, rtr=self.rtr)
+        self.exc = exchanging.Exchanger(db=self.db, handlers=[], local=True)
         self.kvy = eventing.Kevery(db=self.db, lax=False, local=True, rvy=self.rvy)
         self.kvy.registerReplyRoutes(router=self.rtr)
-        self.psr = parsing.Parser(framed=True, kvy=self.kvy, rvy=self.rvy)
+        self.psr = parsing.Parser(framed=True, kvy=self.kvy, rvy=self.rvy, exc=self.exc)
         self.habs = {}  # empty .habs
         self._signator = None
         self.inited = False
@@ -527,12 +528,12 @@ class Habery:
             if len(keys) > 1:
                 raise kering.ConfigurationError("Identifier must have only one key, {} has {}"
                                                 .format(aid, len(keys)))
-            nkeys = kever.nexter.digs
-            if len(nkeys) > 1:
+            ndigs = kever.nexter.digs
+            if len(ndigs) > 1:
                 raise kering.ConfigurationError("Identifier must have only one nexy key commitment, {} has {}"
-                                                .format(aid, len(nkeys)))
+                                                .format(aid, len(ndigs)))
 
-            diger = coring.Diger(qb64=nkeys[0])
+            diger = coring.Diger(qb64=ndigs[0])
 
             gverfers.append(keys[0])
             gdigers.append(diger)
@@ -552,46 +553,6 @@ class Habery:
 
         if self.cf:
             self.cf.close(clear=self.cf.temp)
-
-    def resolveVerifiers(self, pre=None, sn=0, dig=None):
-        """
-        Returns the Tholder and Verfers for the provided identifier prefix.
-        Default pre is own .pre
-
-        Parameters:
-            pre(str) is qb64 str of bytes of identifier prefix.
-            sn(int) is the sequence number of the est event
-            dig(str) is qb64 str of digest of est event
-
-        """
-
-        prefixer = coring.Prefixer(qb64=pre)
-        if prefixer.transferable:
-            # receipted event and receipter in database so get receipter est evt
-            # retrieve dig of last event at sn of est evt of receipter.
-            sdig = self.db.getKeLast(key=snKey(pre=prefixer.qb64b,
-                                               sn=sn))
-            if sdig is None:
-                # receipter's est event not yet in receipters's KEL
-                raise ValidationError("key event sn {} for pre {} is not yet in KEL"
-                                      "".format(sn, pre))
-            # retrieve last event itself of receipter est evt from sdig
-            sraw = self.db.getEvt(key=dgKey(pre=prefixer.qb64b, dig=bytes(sdig)))
-            # assumes db ensures that sraw must not be none because sdig was in KE
-            sserder = Serder(raw=bytes(sraw))
-            if dig is not None and not sserder.compare(said=dig):  # endorser's dig not match event
-                raise ValidationError("Bad proof sig group at sn = {}"
-                                      " for ksn = {}."
-                                      "".format(sn, sserder.ked))
-
-            verfers = sserder.verfers
-            tholder = sserder.tholder
-
-        else:
-            verfers = [coring.Verfer(qb64=pre)]
-            tholder = coring.Tholder(sith="1")
-
-        return tholder, verfers
 
     @property
     def kevers(self):
@@ -649,6 +610,10 @@ class Habery:
                 for oobi in conf["durls"]:
                     obr = basing.OobiRecord(date=help.toIso8601(dt))
                     self.db.oobis.put(keys=(oobi,), val=obr)
+            if "wurls" in conf:  # well known OOBI URLs for MFA
+                for oobi in conf["wurls"]:
+                    obr = basing.OobiRecord(date=help.toIso8601(dt))
+                    self.db.woobi.put(keys=(oobi,), val=obr)
 
     @property
     def signator(self):
@@ -964,17 +929,17 @@ class Hab:
         if self.delpre:
             serder = eventing.delcept(keys=keys,
                                       delpre=self.delpre,
-                                      sith=cst,
+                                      isith=cst,
                                       nsith=nst,
-                                      nkeys=[diger.qb64 for diger in digers],
+                                      ndigs=[diger.qb64 for diger in digers],
                                       toad=toad,
                                       wits=wits,
                                       cnfg=cnfg, )
         else:
             serder = eventing.incept(keys=keys,
-                                     sith=cst,
+                                     isith=cst,
                                      nsith=nst,
-                                     nkeys=[diger.qb64 for diger in digers],
+                                     ndigs=[diger.qb64 for diger in digers],
                                      toad=toad,
                                      wits=wits,
                                      cnfg=cnfg,
@@ -1183,9 +1148,9 @@ class Hab:
                                       keys=[verfer.qb64 for verfer in verfers],
                                       dig=kever.serder.saider.qb64,
                                       sn=kever.sner.num + 1,
-                                      sith=cst,
+                                      isith=cst,
                                       nsith=nst,
-                                      nkeys=[diger.qb64 for diger in digers],
+                                      ndigs=[diger.qb64 for diger in digers],
                                       toad=toad,
                                       wits=kever.wits,
                                       cuts=cuts,
@@ -1196,9 +1161,9 @@ class Hab:
                                      keys=[verfer.qb64 for verfer in verfers],
                                      dig=kever.serder.saider.qb64,
                                      sn=kever.sner.num + 1,
-                                     sith=cst,
+                                     isith=cst,
                                      nsith=nst,
-                                     nkeys=[diger.qb64 for diger in digers],
+                                     ndigs=[diger.qb64 for diger in digers],
                                      toad=toad,
                                      wits=kever.wits,
                                      cuts=cuts,
@@ -1302,6 +1267,28 @@ class Hab:
             msg = eventing.messagize(reserder, cigars=cigars)
 
         self.psr.parseOne(ims=bytearray(msg))  # process local copy into db
+        return msg
+
+    def exchange(self, serder, save=False):
+        """
+        Returns signed exn, message of serder with count code and receipt
+        couples (pre+cig)
+        Builds msg and then processes it into own db to validate
+        """
+        # sign serder event
+        if self.kever.prefixer.transferable:
+            seal = eventing.SealLast(i=self.kever.prefixer.qb64)
+            sigers = self.sign(ser=serder.raw,
+                               indexed=True)
+            msg = eventing.messagize(serder=serder, sigers=sigers, seal=seal)
+        else:
+            cigars = self.sign(ser=serder.raw,
+                               indexed=False)
+            msg = eventing.messagize(serder, cigars=cigars)
+
+        if save:
+            self.psr.parseOne(ims=bytearray(msg))  # process local copy into db
+
         return msg
 
     def witness(self, serder):

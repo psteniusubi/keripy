@@ -1715,7 +1715,7 @@ def test_clean_baser():
         state = natHab.db.states.get(keys=natHab.pre)  # Serder instance
         assert state.sn == 6
         assert state.ked["f"] == '6'
-        assert natHab.db.env.stat()['entries'] == 58
+        assert natHab.db.env.stat()['entries'] == 67
 
         # test reopenDB with reuse  (because temp)
         with basing.reopenDB(db=natHab.db, reuse=True):
@@ -1724,7 +1724,7 @@ def test_clean_baser():
             assert ldig == natHab.kever.serder.saidb
             serder = coring.Serder(raw=bytes(natHab.db.getEvt(dbing.dgKey(natHab.pre,ldig))))
             assert serder.said == natHab.kever.serder.said
-            assert natHab.db.env.stat()['entries'] == 58
+            assert natHab.db.env.stat()['entries'] == 67
 
             # verify name pre kom in db
             data = natHab.db.habs.get(keys=natHab.name)
@@ -1735,8 +1735,8 @@ def test_clean_baser():
                                       keys=[verfer.qb64 for verfer in natHab.kever.verfers],
                                       dig=natHab.kever.serder.said,
                                       sn=natHab.kever.sn+1,
-                                      sith='2',
-                                      nkeys=natHab.kever.nexter.digs)
+                                      isith='2',
+                                      ndigs=natHab.kever.nexter.digs)
             fn, dts = natHab.kever.logEvent(serder=badsrdr, first=True)
             natHab.db.states.pin(keys=natHab.pre, val=natHab.kever.state())
 
@@ -1924,8 +1924,8 @@ def test_usebaser():
         code = MtrDex.Blake3_256  # Blake3 digest of incepting data
         serder = incept(keys=keys,
                         code=code,
-                        sith=sith,
-                        nkeys=[coring.Diger(ser=key).qb64 for key in nxtkeys])
+                        isith=sith,
+                        ndigs=[coring.Diger(ser=key).qb64 for key in nxtkeys])
 
 
         # sign serialization
@@ -1938,9 +1938,9 @@ def test_usebaser():
         nxtkeys = [signers[5].verfer.qb64b, signers[6].verfer.qb64b, signers[7].verfer.qb64b]
         serder = rotate(pre=kever.prefixer.qb64,
                         keys=keys,
-                        sith=sith,
+                        isith=sith,
                         dig=kever.serder.saider.qb64,
-                        nkeys=[coring.Diger(ser=key).qb64 for key in nxtkeys],
+                        ndigs=[coring.Diger(ser=key).qb64 for key in nxtkeys],
                         sn=1)
 
         # sign serialization
