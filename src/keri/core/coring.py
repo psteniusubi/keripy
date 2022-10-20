@@ -2891,6 +2891,8 @@ class Nexter:
     Attributes:
 
     Properties:
+        digers (list[Diger]): instances of next Digers
+        digs (list[str]): next key digs from .digers qb64
 
     Methods:
 
@@ -5109,12 +5111,7 @@ class Serder(Sadder):
         """
         return json.dumps(self.ked, indent=1)[:size if size is not None else None]
 
-# Todo
-# accept JSON representation of sith for cli input
-# thold is base representation so derive sith from thold not keep sith around
-# generate json sith from thold
-# refactor process weighted from thold input and add other methods to generate
-# thold
+
 
 class Tholder:
     """
@@ -5127,8 +5124,10 @@ class Tholder:
 
     Properties:
         .weighted is Boolean True if fractional weighted threshold False if numeric
-        .size is int of minimun size of keys list
-
+        .size is int of minimum size of keys list
+                    when weighted is size of keys list
+                    when unweighted is size of int thold since don't have anyway
+                        to know size of keys list in this case
 
         .limen is qualified b64 signing threshold suitable for CESR serialization.
             either Number.qb64b or Bexter.qb64b.
@@ -5261,6 +5260,8 @@ class Tholder:
     @property
     def json(self):
         """Returns json serialization of sith expression
+
+        Essentially JSON list of lists of strings
         """
         return json.dumps(self.sith)
 
@@ -5328,7 +5329,7 @@ class Tholder:
                 JSON serialized str of either:
                     list of rational number fraction weight strings
                         each denoted w where 0 <= w <= 1
-                    list of list of rational number fraction weight strings
+                    list of lists of rational number fraction weight strings
                         each denoted w where 0 <= w <= 1
 
                 when any w is 0 or 1 then representation is 0 or 1 not 0/1 or 1/1
@@ -5348,7 +5349,7 @@ class Tholder:
 
             mask = [isinstance(w, str) for w in sith]  # list of strings
             if mask and all(mask):  # not empty and all strings
-                sith = [sith]  # make list of list so uniform
+                sith = [sith]  # make list of lists so uniform
             elif any(mask):  # some strings but not all
                 raise ValueError("Invalid sith = {} some weights non non string."
                                  "".format(sith))
@@ -5356,7 +5357,8 @@ class Tholder:
             # replace fractional strings with fractions
             thold = []
             for clause in sith:  # convert string fractions to Fractions
-                thold.append([self._checkWeight(Fraction(w)) for w in clause])  # append list of Fractions
+                # append list of Fractions
+                thold.append([self._checkWeight(Fraction(w)) for w in clause])
 
             self._processWeighted(thold=thold)
 

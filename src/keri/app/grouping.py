@@ -37,14 +37,14 @@ class Counselor(doing.DoDoer):
 
         super(Counselor, self).__init__(doers=doers, **kwa)
 
-    def start(self, aids, pid, prefixer, seqner, saider):
+    def start(self, mids, mid, prefixer, seqner, saider):
         """ Begin processing of escrowed group multisig identifier
 
         Escrow identifier for multisigs, witness receipts and delegation anchor
 
         Parameters:
-            aids (list): qb64 identifier prefixes of group participants
-            pid (str): qb64 identifier prefix of local participant (laid)
+            mids (list): group member ids qb64 (multisig group)
+            mid (str): group member (local) identifier prefix qb64
             prefixer (Prefixer): prefixer of group identifier
             seqner (Seqner): seqner of inception event of group identifier
             saider (Saider): saider of inception event of group identifier
@@ -55,19 +55,19 @@ class Counselor(doing.DoDoer):
         serder = coring.Serder(raw=evt)
         del evt[:serder.size]
 
-        others = list(aids)
-        others.remove(pid)
+        others = list(mids)
+        others.remove(mid)
 
-        print(f"Sending multisig event to {len(aids) - 1} other participants")
+        print(f"Sending multisig event to {len(mids) - 1} other participants")
         for recpt in others:
-            self.postman.send(src=pid, dest=recpt, topic="multisig", serder=serder, attachment=evt)
+            self.postman.send(src=mid, dest=recpt, topic="multisig", serder=serder, attachment=evt)
 
         print(f"Waiting for other signatures for {seqner.sn}...")
         return self.hby.db.gpse.add(keys=(prefixer.qb64,), val=(seqner, saider))
 
 
 
-    def rotate(self, ghab, aids, isith=None, nsith=None,
+    def rotate(self, ghab, mids, isith=None, nsith=None,
                toad=None, cuts=None, adds=None, data=None):
         """ Begin processing of escrowed group multisig identifier
 
@@ -75,7 +75,7 @@ class Counselor(doing.DoDoer):
 
         Parameters:
             ghab (Hab): group identifier Hab
-            aids (list): qb64 identifier prefixes of participants
+            mids (list): group member identifier prefixes qb64
             isith (Optional[int,str]) currentsigning threshold as int or str hex
                  or list of str weights
             nsith (Optional[int,str])next signing threshold as int or str hex
@@ -85,44 +85,45 @@ class Counselor(doing.DoDoer):
             adds (list) of qb64 pre of witnesses to be added to witness list
             data (list) of dicts of committed data such as seals
 
-        ToDo
-        changes aids to gaids and make it a list of tuples (laid, index, ondex)
+        ToDo: NRR
+        Add midxs for each group member identifier or just the local member
+        for mhab.pre
         Then store these with rotationRecord to be used by .processPartialAidEscrow()
 
 
         """
-        aids = aids if aids is not None else ghab.gaids
-        pid = ghab.lhab.pre
-        if pid not in aids:
-            raise kering.ConfigurationError(f"local identifier {pid} not elected"
-                                            f" to participate in rotation: {aids}")
+        mids = mids if mids is not None else ghab.mids
+        mid = ghab.mhab.pre
+        if mid not in mids:
+            raise kering.ConfigurationError(f"local identifier {mid} not elected"
+                                            f" to participate in rotation: {mids}")
 
         kever = ghab.kever
 
         # Get local next key and see if we are in current group next keys
-        pkever = ghab.lhab.kever
+        pkever = ghab.mhab.kever
         pnkey = pkever.nexter.digs[0]
 
 
-        rec = basing.RotateRecord(aids=aids, sn=kever.sn+1, isith=isith, nsith=nsith,
+        rec = basing.RotateRecord(mids=mids, sn=kever.sn+1, isith=isith, nsith=nsith,
             toad=toad, cuts=cuts, adds=adds, data=data, date=helping.nowIso8601())
 
         if pnkey in kever.nexter.digs:  # local already participate in last event, rotate
-            ghab.lhab.rotate()
+            ghab.mhab.rotate()
             print(f"Rotating local identifier, waiting for witness receipts")
-            self.witDoer.msgs.append(dict(pre=ghab.lhab.pre, sn=ghab.lhab.kever.sn))
+            self.witDoer.msgs.append(dict(pre=ghab.mhab.pre, sn=ghab.mhab.kever.sn))
             return self.hby.db.glwe.put(keys=(ghab.pre,), val=rec)
 
         else:
-            rot = ghab.lhab.makeOwnEvent(pkever.lastEst.sn)  # grab latest est evt
-            others = list(aids)
-            others.remove(pid)
+            rot = ghab.mhab.makeOwnEvent(pkever.lastEst.sn)  # grab latest est evt
+            others = list(mids)
+            others.remove(mid)
             serder = coring.Serder(raw=rot)
             del rot[:serder.size]
 
-            print(f"Sending local rotation event to {len(aids) - 1} other participants")
+            print(f"Sending local rotation event to {len(mids) - 1} other participants")
             for recpt in others:
-                self.postman.send(src=pid, dest=recpt, topic="multisig", serder=serder, attachment=rot)
+                self.postman.send(src=mid, dest=recpt, topic="multisig", serder=serder, attachment=rot)
 
             return self.hby.db.gpae.put(keys=(ghab.pre,), val=rec)
 
@@ -188,27 +189,28 @@ class Counselor(doing.DoDoer):
         """
         for (pre,), rec in self.hby.db.glwe.getItemIter():  # group partial witness escrow
             ghab = self.hby.habs[pre]
-            pid = ghab.lhab.pre
-            pkever = ghab.lhab.kever
-            dgkey = dbing.dgKey(pid, pkever.serder.saidb)
+            mid = ghab.mhab.pre
+            pkever = ghab.mhab.kever
+            dgkey = dbing.dgKey(mid, pkever.serder.saidb)
 
             # Load all the witness receipts we have so far
             wigs = self.hby.db.getWigs(dgkey)
             if len(wigs) == len(pkever.wits):  # We have all of them, this event is finished
                 self.hby.db.glwe.rem(keys=(pre,))
 
-                rot = self.hby.db.cloneEvtMsg(pid, pkever.sn, pkever.serder.said)  # grab latest est evt
+                rot = self.hby.db.cloneEvtMsg(mid, pkever.sn, pkever.serder.said)  # grab latest est evt
 
-                others = list(rec.aids)
-                others.remove(pid)
+                others = list(rec.mids)
+                others.remove(mid)
                 serder = coring.Serder(raw=rot)
                 del rot[:serder.size]
 
                 print(f"Sending local rotation event to {len(others)} other participants")
                 for recpt in others:
-                    self.postman.send(src=pid, dest=recpt, topic="multisig", serder=serder, attachment=rot)
+                    self.postman.send(src=mid, dest=recpt, topic="multisig", serder=serder, attachment=rot)
 
                 return self.hby.db.gpae.put(keys=(ghab.pre,), val=rec)
+
 
     def processPartialAidEscrow(self):
         """
@@ -216,7 +218,7 @@ class Counselor(doing.DoDoer):
         processing will send this local controllers rotation event to all other participants
         then this escrow waits for rotations from all other participants
 
-        ToDo
+        ToDo: NRR
         rec includes the dual indices for current and next for new rotation
         add database for each group hab to store for each local hab the reference
         to the event used in by local hab to provided current and/or next keys
@@ -234,34 +236,34 @@ class Counselor(doing.DoDoer):
         """
         # ignore saider because it is not relevant yet
         for (pre,), rec in self.hby.db.gpae.getItemIter():  # group partially aid escrow
-            ghab = self.hby.habs[pre]
-            gkever = ghab.kever
+            ghab = self.hby.habs[pre]  # group hab Hab instance
+            gkever = ghab.kever  # group hab's Kever instance key state
 
-            gverfers = []  # verfers of group signing keys
-            ndigers = list(gkever.nexter.digers)
-            for aid in rec.aids:
+            lverfers = []  # local verfers of group signing keys
+            ldigers = list(gkever.nexter.digers)  # local participants next digers
+            for aid in rec.mids:
                 pkever = self.hby.kevers[aid]
-                idx = ghab.gaids.index(aid)
+                idx = ghab.mids.index(aid)
                 if pkever.nexter.digs[0] != gkever.nexter.digs[idx]:
-                    gverfers.append(pkever.verfers[0])
-                    ndigers[idx] = pkever.nexter.digers[0]
+                    lverfers.append(pkever.verfers[0])
+                    ldigers[idx] = pkever.nexter.digers[0]
                 else:
                     break
 
-            if len(gverfers) != len(rec.aids):
+            if len(lverfers) != len(rec.mids):
                 continue
 
             rot = ghab.rotate(isith=rec.isith, nsith=rec.nsith,
                               toad=rec.toad, cuts=rec.cuts, adds=rec.adds, data=rec.data,
-                              gverfers=gverfers, gdigers=ndigers)
+                              merfers=lverfers, migers=ldigers)
             serder = coring.Serder(raw=rot)
             del rot[:serder.size]
 
-            others = list(rec.aids)
-            others.remove(ghab.lhab.pre)
+            others = list(rec.mids)
+            others.remove(ghab.mhab.pre)
             print(f"Sending rotation event to {len(others)} other participants")
             for recpt in others:
-                self.postman.send(src=ghab.lhab.pre, dest=recpt, topic="multisig", serder=serder, attachment=rot)
+                self.postman.send(src=ghab.mhab.pre, dest=recpt, topic="multisig", serder=serder, attachment=rot)
 
             print("Waiting for other signatures...")
             self.hby.db.gpae.rem((pre,))
@@ -284,7 +286,7 @@ class Counselor(doing.DoDoer):
                 ghab = self.hby.habs[pre]
                 kever = ghab.kever
                 keys = [verfer.qb64 for verfer in kever.verfers]
-                witer = ghab.lhab.kever.verfers[0].qb64 == keys[0]  # Elected to perform delegation and witnessing
+                witer = ghab.mhab.kever.verfers[0].qb64 == keys[0]  # Elected to perform delegation and witnessing
 
                 if kever.delegated and kever.ilk in (coring.Ilks.dip, coring.Ilks.drt):
                     # We are a delegated identifier, must wait for delegator approval for dip and drt
@@ -293,7 +295,7 @@ class Counselor(doing.DoDoer):
                         self.swain.msgs.append(dict(pre=pre, sn=seqner.sn))
                     else:
                         anchor = dict(i=pre, s=seqner.snh, d=saider.qb64)
-                        self.witq.query(src=ghab.lhab.pre, pre=kever.delegator, anchor=anchor)
+                        self.witq.query(src=ghab.mhab.pre, pre=kever.delegator, anchor=anchor)
 
                     print("Waiting for delegation approval...")
                     self.hby.db.gdee.add(keys=(pre,), val=(seqner, saider))
@@ -318,7 +320,7 @@ class Counselor(doing.DoDoer):
             kever = ghab.kevers[pre]
 
             keys = [verfer.qb64 for verfer in kever.verfers]
-            witer = ghab.lhab.kever.verfers[0].qb64 == keys[0]  # We are elected to perform delegation and witnessing
+            witer = ghab.mhab.kever.verfers[0].qb64 == keys[0]  # We are elected to perform delegation and witnessing
 
             if serder := self.hby.db.findAnchoringEvent(kever.delegator, anchor=anchor):
                 aseq = coring.Seqner(sn=serder.sn)
@@ -351,7 +353,7 @@ class Counselor(doing.DoDoer):
             if len(wigs) == len(kever.wits):  # We have all of them, this event is finished
                 ghab = self.hby.habs[pre]
                 keys = [verfer.qb64 for verfer in kever.verfers]
-                witer = ghab.lhab.kever.verfers[0].qb64 == keys[0]
+                witer = ghab.mhab.kever.verfers[0].qb64 == keys[0]
                 if witer and len(kever.wits) > 0:
                     witnessed = False
                     for cue in self.witDoer.cues:
@@ -377,7 +379,7 @@ class Counselor(doing.DoDoer):
         evts = []
         if (rec := self.hby.db.gpae.get(keys=key)) is not None:  # RotateRecord
             data = dict(
-                aids=rec.aids,
+                aids=rec.mids,
                 sn=rec.sn,
                 isith=rec.isith,
                 nsith=rec.nsith,
@@ -390,7 +392,7 @@ class Counselor(doing.DoDoer):
             evts.append(data)
         if (rec := self.hby.db.glwe.get(keys=key)) is not None:  # RotateRecord
             data = dict(
-                aids=rec.aids,
+                aids=rec.mids,
                 sn=rec.sn,
                 isith=rec.isith,
                 nsith=rec.nsith,
@@ -592,7 +594,7 @@ class MultisigRotateHandler(doing.DoDoer):
                     logger.error(f"invalid rotate message, not a local group: {pay}")
                     continue
 
-                if src not in ghab.gaids or src not in ghab.kevers:
+                if src not in ghab.mids or src not in ghab.kevers:
                     logger.error(f"invalid incept message, source not knows or not part of group.  evt: {msg}")
                     continue
 
@@ -626,7 +628,7 @@ def multisigRotateExn(ghab, aids, isith, toad, cuts, adds, data):
                                            adds=list(adds),
                                            data=data)
                               )
-    ims = ghab.lhab.endorse(serder=exn, last=True, pipelined=False)
+    ims = ghab.mhab.endorse(serder=exn, last=True, pipelined=False)
     atc = bytearray(ims[exn.size:])
 
     return exn, atc
@@ -695,7 +697,7 @@ class MultisigInteractHandler(doing.DoDoer):
                     logger.error(f"invalid rotate message, not a local group: {pay}")
                     continue
 
-                if src not in ghab.gaids or src not in ghab.kevers:
+                if src not in ghab.mids or src not in ghab.kevers:
                     logger.error(f"invalid incept message, source not knows or not part of group.  evt: {msg}")
                     continue
 
@@ -729,7 +731,7 @@ def multisigInteractExn(ghab, aids, data):
                                            aids=aids,
                                            data=data)
                               )
-    ims = ghab.lhab.endorse(serder=exn, last=True, pipelined=False)
+    ims = ghab.mhab.endorse(serder=exn, last=True, pipelined=False)
     atc = bytearray(ims[exn.size:])
 
     return exn, atc
@@ -806,7 +808,7 @@ def multisigIssueExn(hab, creder):
 
     """
     exn = exchanging.exchange(route="/multisig/issue", payload=creder.ked)
-    evt = hab.lhab.endorse(serder=exn, last=True, pipelined=False)
+    evt = hab.mhab.endorse(serder=exn, last=True, pipelined=False)
     atc = bytearray(evt[exn.size:])
 
     return exn, atc
