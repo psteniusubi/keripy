@@ -819,7 +819,7 @@ class Poller(doing.DoDoer):
             while True:
 
                 now = helping.nowUTC()
-                if now - created > datetime.timedelta(seconds=5):
+                if now - created > datetime.timedelta(seconds=30):
                     self.remove([clientDoer])
                     break
 
@@ -983,8 +983,8 @@ class MailboxIterable:
             for topic, idx in self.topics.items():
                 key = self.pre + topic
                 for fn, _, msg in self.mbx.cloneTopicIter(key, idx):
-                    data.extend(bytearray("id: {}\nevent: {}\nretry: {}\ndata: ".format(fn, topic, self.retry).encode(
-                        "utf-8")))
+                    data.extend(bytearray("id: {}\nevent: {}\nretry: {}\ndata: ".format(fn, topic, self.retry)
+                                          .encode("utf-8")))
                     data.extend(msg)
                     data.extend(b'\n\n')
                     idx = idx + 1
