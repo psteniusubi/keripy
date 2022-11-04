@@ -6,12 +6,12 @@
     "http://127.0.0.1:5643/oobi/BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM/controller"
   ],
   "durls": [
-    "http://127.0.0.1:7723/oobi/EB9JT6n1lkMGWlUTzYtPnVbknHr85BG-N_vEpqnfN4dM",
-    "http://127.0.0.1:7723/oobi/ED_PcIn1wFDe0GB0W7Bk9I4Q_c9bQJZCM2w7Ex9Plsta",
-    "http://127.0.0.1:7723/oobi/EDqjl80uP0r_SNSp-yImpLGglTEbOwgO77wsOPjyRVKy",
-    "http://127.0.0.1:7723/oobi/EGr5_F-p6jMgIUYYjgaHPJACoi52UYl9QDQuwGDnscQd",
-    "http://127.0.0.1:7723/oobi/EIL-RWno8cEnkGTi9cr7-PFg_IXTPx9fZ0r9snFFZ0nm",
-    "http://127.0.0.1:7723/oobi/EK0jwjJbtYLIynGtmXXLO5MGJ7BDuX2vr2_MhM9QjAxZ",
-    "http://127.0.0.1:7723/oobi/ELqriXX1-lbV9zgXP4BXxqJlpZTgFchll3cyjaCyVKiz"
+    "http://localhost:7723/oobi/EB9JT6n1lkMGWlUTzYtPnVbknHr85BG-N_vEpqnfN4dM",
+    "http://localhost:7723/oobi/ED_PcIn1wFDe0GB0W7Bk9I4Q_c9bQJZCM2w7Ex9Plsta",
+    "http://localhost:7723/oobi/EDqjl80uP0r_SNSp-yImpLGglTEbOwgO77wsOPjyRVKy",
+    "http://localhost:7723/oobi/EGr5_F-p6jMgIUYYjgaHPJACoi52UYl9QDQuwGDnscQd",
+    "http://localhost:7723/oobi/EIL-RWno8cEnkGTi9cr7-PFg_IXTPx9fZ0r9snFFZ0nm",
+    "http://localhost:7723/oobi/EK0jwjJbtYLIynGtmXXLO5MGJ7BDuX2vr2_MhM9QjAxZ",
+    "http://localhost:7723/oobi/ELqriXX1-lbV9zgXP4BXxqJlpZTgFchll3cyjaCyVKiz"
   ]
 }
