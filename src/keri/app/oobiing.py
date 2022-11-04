@@ -499,7 +499,6 @@ class Oobiery:
 
                     self.hby.db.coobi.rem(keys=(url,))
                     obr.state = Result.resolved
-                    print(f"{url} resolved")
                     self.hby.db.roobi.put(keys=(url,), val=obr)
 
                 elif response["headers"]["Content-Type"] == "application/schema+json":  # Schema response to data OOBI
@@ -518,7 +517,24 @@ class Oobiery:
                     self.hby.db.coobi.rem(keys=(url,))
                     self.hby.db.roobi.put(keys=(url,), val=obr)
 
-                elif response["headers"]["Content-Type"].startswith("application/json"):  # Unsigned rpy OOBI
+                elif response["headers"]["Content-Type"].startswith("application/json"):  # Unsigned rpy OOBI or Schema
+
+                    try:
+                        schemer = scheming.Schemer(raw=bytearray(response["body"]))
+                        if schemer.said == obr.said:
+                            self.hby.db.schema.pin(keys=(schemer.said,), val=schemer)
+                            result = Result.resolved
+                        else:
+                            result = Result.failed
+
+                        obr.state = result
+                        self.hby.db.coobi.rem(keys=(url,))
+                        self.hby.db.roobi.put(keys=(url,), val=obr)
+                        continue
+
+                    except (kering.ValidationError, ValueError):
+                        pass
+
                     serder = eventing.Serder(raw=bytearray(response["body"]))
                     if not serder.ked['t'] == coring.Ilks.rpy:
                         obr.state = Result.failed
@@ -532,7 +548,6 @@ class Oobiery:
                         obr.state = Result.failed
                         self.hby.db.coobi.rem(keys=(url,))
                         self.hby.db.roobi.put(keys=(url,), val=obr)
-
 
                 else:
                     self.hby.db.coobi.rem(keys=(url,))
