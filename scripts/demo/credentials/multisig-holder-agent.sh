@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# curl -s http://localhost:5623/notifications | jq
+# curl -s http://localhost:5723/notifications | jq
+# curl -s http://localhost:5823/notifications | jq
+
 wan=BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha
 wil=BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM
 wes=BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX
@@ -9,7 +13,12 @@ schema=EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao
 multisig1=EKYLUMmNPZeEs77Zvclf0bSN5IN-mLfLpx2ySb-HDlk4
 multisig2=EJccSRTfXYF6wrUVuenAIHzwcx3hJugeiJsEKmndi5q1
 issuer=EKhW9MhMoy4ZzAdw9D5Kvtk7-mn75SSDDv1BdMro1av-
-holder=EM1BxzJgtrOl9f66zodu0YQpWcTabhSAiQy9r0xHtV6r
+
+sith=1
+holder=EBom5rU8O-pYWggrj3EpFavYztIJZf6hRPhNQAjRWp6P
+
+sith="[\"1/2\",\"1/2\"]"
+holder=EIf3as1zCiQnH4d9ie6TEmUvqmtgbMKt6jckYrQoE1PH
 
 # DoB26Fj4x9LboAFWJra17O
 curl -s -X POST "http://localhost:5623/boot" -H "accept: */*" -H "Content-Type: application/json" -d "{\"name\":\"multisig1\",\"passcode\":\"DoB2-6Fj4x-9Lbo-AFWJr-a17O\",\"salt\":\"0ACDEyMzQ1Njc4OWxtbm9aBc\"}" | jq
@@ -45,8 +54,8 @@ curl -s -X POST "http://localhost:5823/oobi" -H "accept: */*" -H "Content-Type: 
 
 echo "inception event for multisig holder"
 sleep 3
-curl -s -X POST "http://localhost:5623/groups/holder/icp" -H "accept: */*" -H "Content-Type: application/json" -d "{\"aids\":[\"${multisig1}\",\"${multisig2}\"], \"transferable\":true,\"wits\":[${wits}],\"toad\":3, \"isith\":2,\"nsith\":2}" | jq
-curl -s -X PUT "http://localhost:5723/groups/holder/icp" -H "accept: */*" -H "Content-Type: application/json" -d "{\"aids\":[\"${multisig1}\",\"${multisig2}\"], \"transferable\":true,\"wits\":[${wits}],\"toad\":3, \"isith\":2,\"nsith\":2}" | jq
+curl -s -X POST "http://localhost:5623/groups/holder/icp" -H "accept: */*" -H "Content-Type: application/json" -d "{\"aids\":[\"${multisig1}\",\"${multisig2}\"], \"transferable\":true,\"wits\":[${wits}],\"toad\":3, \"isith\":${sith},\"nsith\":${sith}}" | jq
+curl -s -X PUT "http://localhost:5723/groups/holder/icp" -H "accept: */*" -H "Content-Type: application/json" -d "{\"aids\":[\"${multisig1}\",\"${multisig2}\"], \"transferable\":true,\"wits\":[${wits}],\"toad\":3, \"isith\":${sith},\"nsith\":${sith}}" | jq
 
 sleep 3
 echo oobi holder to issuer
@@ -63,7 +72,7 @@ curl -s -X POST "http://localhost:5823/registries" -H "accept: */*" -H "Content-
 
 sleep 3
 echo "Issue Credential"
-curl -X POST "http://localhost:5823/credentials/issuer" -H "accept: application/json" -H "Content-Type: application/json" -d "{\"credentialData\":{\"LEI\":\"5493001KJTIIGC8Y1R17\"},\"recipient\":\"${holder}\",\"registry\":\"vLEI\",\"schema\":\"${schema}\"}" | jq
+curl -s -X POST "http://localhost:5823/credentials/issuer" -H "accept: application/json" -H "Content-Type: application/json" -d "{\"credentialData\":{\"LEI\":\"5493001KJTIIGC8Y1R17\"},\"recipient\":\"${holder}\",\"registry\":\"vLEI\",\"schema\":\"${schema}\"}" | jq
 
 sleep 3
 echo "Holders Received Credentials..."

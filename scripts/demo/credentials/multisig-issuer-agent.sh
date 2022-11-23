@@ -6,6 +6,10 @@
 #   > vLEI-server -s ./schema/acdc -c ./samples/acdc/ -o ./samples/oobis/
 #
 
+# curl -s http://localhost:5623/notifications | jq
+# curl -s http://localhost:5723/notifications | jq
+# curl -s http://localhost:5823/notifications | jq
+
 wan=BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha
 wil=BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM
 wes=BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX
@@ -13,9 +17,14 @@ wits="\"${wan}\",\"${wil}\",\"${wes}\""
 schema=EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao
 
 multisig1=EKYLUMmNPZeEs77Zvclf0bSN5IN-mLfLpx2ySb-HDlk4
-multisig2=EKYLUMmNPZeEs77Zvclf0bSN5IN-mLfLpx2ySb-HDlk4
+multisig2=EJccSRTfXYF6wrUVuenAIHzwcx3hJugeiJsEKmndi5q1
 holder=EH2XI0_WVqxqrxsUUUmDmhMO97HJ4Y6GzmoQS7UBGtUV
-issuer=EM1BxzJgtrOl9f66zodu0YQpWcTabhSAiQy9r0xHtV6r
+
+sith=1
+issuer=EBom5rU8O-pYWggrj3EpFavYztIJZf6hRPhNQAjRWp6P
+
+sith="[\"1/2\",\"1/2\"]"
+issuer=EIf3as1zCiQnH4d9ie6TEmUvqmtgbMKt6jckYrQoE1PH
 
 curl -s -X POST "http://localhost:5623/boot" -H "accept: */*" -H "Content-Type: application/json" -d "{\"name\":\"multisig1\",\"passcode\":\"DoB2-6Fj4x-9Lbo-AFWJr-a17O\",\"salt\":\"0ACDEyMzQ1Njc4OWxtbm9aBc\"}" | jq
 curl -s -X POST "http://localhost:5723/boot" -H "accept: */*" -H "Content-Type: application/json" -d "{\"name\":\"multisig2\",\"passcode\":\"DoB2-6Fj4x-9Lbo-AFWJr-a17O\", \"salt\":\"0ACDEyMzQ1Njc4OWdoaWpsaw\"}" | jq
@@ -38,8 +47,8 @@ curl -s -X POST "http://localhost:5623/oobi" -H "accept: */*" -H "Content-Type: 
 curl -s -X POST "http://localhost:5723/oobi" -H "accept: */*" -H "Content-Type: application/json" -d "{\"oobialias\": \"holder\", \"url\":\"http://127.0.0.1:5643/oobi/${holder}/witness/${wan}\"}" | jq
 
 sleep 3
-curl -s -X POST "http://localhost:5623/groups/issuer/icp" -H "accept: */*" -H "Content-Type: application/json" -d "{\"aids\":[\"${multisig1}\",\"${multisig2}\"], \"transferable\":true,\"wits\":[${wits}],\"toad\":3, \"isith\":2,\"nsith\":2}" | jq
-curl -s -X PUT "http://localhost:5723/groups/issuer/icp" -H "accept: */*" -H "Content-Type: application/json" -d "{\"aids\":[\"${multisig1}\",\"${multisig2}\"], \"transferable\":true,\"wits\":[${wits}],\"toad\":3, \"isith\":2,\"nsith\":2}" | jq
+curl -s -X POST "http://localhost:5623/groups/issuer/icp" -H "accept: */*" -H "Content-Type: application/json" -d "{\"aids\":[\"${multisig1}\",\"${multisig2}\"], \"transferable\":true,\"wits\":[${wits}],\"toad\":3, \"isith\":${sith},\"nsith\":${sith}}" | jq
+curl -s -X PUT "http://localhost:5723/groups/issuer/icp" -H "accept: */*" -H "Content-Type: application/json" -d "{\"aids\":[\"${multisig1}\",\"${multisig2}\"], \"transferable\":true,\"wits\":[${wits}],\"toad\":3, \"isith\":${sith},\"nsith\":${sith}}" | jq
 
 sleep 3
 curl -s -X POST "http://localhost:5623/registries" -H "accept: */*" -H "Content-Type: application/json" -d "{\"alias\":\"issuer\",\"nonce\":\"AHSNDV3ABI6U8OIgKaj3aky91ZpNL54I5_7-qwtC6q2s\",\"baks\":[],\"estOnly\":false,\"name\":\"vLEI\",\"noBackers\":true,\"toad\":0}" | jq
