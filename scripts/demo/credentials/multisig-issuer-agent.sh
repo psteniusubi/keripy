@@ -36,8 +36,8 @@ curl -s -X PUT "http://localhost:5723/boot" -H "accept: */*" -H "Content-Type: a
 curl -s -X PUT "http://localhost:5823/boot" -H "accept: */*" -H "Content-Type: application/json" -d "{\"name\":\"holder\",\"passcode\":\"DoB2-6Fj4x-9Lbo-AFWJr-a17O\"}" | jq
 
 sleep 4
-curl -s -X POST "http://localhost:5623/ids/multisig1" -H "accept: */*" -H "Content-Type: application/json" -d "{\"transferable\":true,\"wits\":[${wits}],\"toad\":2,\"icount\":1,\"ncount\":1,\"isith\":1,\"nsith\":1}" | jq
-curl -s -X POST "http://localhost:5723/ids/multisig2" -H "accept: */*" -H "Content-Type: application/json" -d "{\"transferable\":true,\"wits\":[${wits}],\"toad\":2,\"icount\":1,\"ncount\":1,\"isith\":1,\"nsith\":1}" | jq
+curl -s -X POST "http://localhost:5623/ids/multisig1" -H "accept: */*" -H "Content-Type: application/json" -d "{\"transferable\":true,\"wits\":[${wits}],\"toad\":3,\"icount\":1,\"ncount\":1,\"isith\":1,\"nsith\":1}" | jq
+curl -s -X POST "http://localhost:5723/ids/multisig2" -H "accept: */*" -H "Content-Type: application/json" -d "{\"transferable\":true,\"wits\":[${wits}],\"toad\":3,\"icount\":1,\"ncount\":1,\"isith\":1,\"nsith\":1}" | jq
 curl -s -X POST "http://localhost:5823/ids/holder" -H "accept: */*" -H "Content-Type: application/json" -d "{\"transferable\":true,\"wits\":[${wits}],\"toad\":3, \"icount\":1,\"ncount\":1,\"isith\":1,\"nsith\":1}" | jq
 
 sleep 4
@@ -61,6 +61,7 @@ curl -s -X POST "http://localhost:5723/registries" -H "accept: */*" -H "Content-
 sleep 3
 CRED=`curl -s -X POST "http://localhost:5623/groups/issuer/credentials" -H "accept: application/json" -H "Content-Type: application/json" -d "{\"credentialData\":{\"LEI\":\"5493001KJTIIGC8Y1R17\"},\"recipient\":\"${holder}\",\"registry\":\"vLEI\",\"schema\":\"${schema}\"}"`
 ESCAPED=`echo -n $CRED  | jq '{credential: . }'`
+echo "${ESCAPED}" | jq
 curl -s -X PUT "http://localhost:5723/groups/issuer/credentials" -H "accept: application/json" -H "Content-Type: application/json" -d "${ESCAPED}" | jq
 
 sleep 3
