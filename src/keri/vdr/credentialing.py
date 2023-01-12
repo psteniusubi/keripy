@@ -372,7 +372,6 @@ class Registrar(doing.DoDoer):
 
         super(Registrar, self).__init__(doers=doers)
 
-
     def incept(self, name, pre, conf=None, smids=None, rmids=None):
         """
 
@@ -381,7 +380,9 @@ class Registrar(doing.DoDoer):
             pre (str): qb64 identifier prefix of issuing identifier in control of this registry
             conf (dict): configuration information for the registry (noBackers, estOnly)
             smids (list): group signing member ids qb64 in the anchoring event
+                need to contribute current signing key
             rmids (list): group rotating member ids in the anchoring event
+                need to contribute digest of next rotating key
 
         Returns:
             Registry:  created registry
@@ -396,7 +397,7 @@ class Registrar(doing.DoDoer):
         rseq = coring.Seqner(sn=0)
         rseal = SealEvent(registry.regk, "0", registry.regd)
         rseal = dict(i=rseal.i, s=rseal.s, d=rseal.d)
-        if hab.mhab is None:
+        if not hab.group:
             if estOnly:
                 hab.rotate(data=[rseal])
             else:
@@ -433,7 +434,9 @@ class Registrar(doing.DoDoer):
             said (str): qb64 SAID of the credential to issue
             dt (str): iso8601 formatted date string of issuance date
             smids (list): group signing member ids qb64 in the anchoring event
+                need to contribute current signing key
             rmids (list): group rotating member ids qb64 in the anchoring event
+                need to contribute digest of next rotating key
         """
         registry = self.rgy.regs[regk]
         hab = registry.hab
@@ -445,7 +448,7 @@ class Registrar(doing.DoDoer):
         rseal = SealEvent(vcid, rseq.snh, iserder.said)
         rseal = dict(i=rseal.i, s=rseal.s, d=rseal.d)
 
-        if hab.mhab is None:  # not a multisig group
+        if not hab.group:  # not a multisig group
             if registry.estOnly:
                 hab.rotate(data=[rseal])
             else:
@@ -481,7 +484,9 @@ class Registrar(doing.DoDoer):
             said (str): qb64 SAID of the credential to issue
             dt (str): iso8601 formatted date string of issuance date
             smids (list): group signing member ids (multisig) in the anchoring event
+                need to contribute digest of current signing key
             rmids (list | None): group rotating member ids (multisig) in the anchoring event
+                need to contribute digest of next rotating key
         """
         registry = self.rgy.regs[regk]
         hab = registry.hab
@@ -497,7 +502,7 @@ class Registrar(doing.DoDoer):
         rseal = SealEvent(vcid, rseq.snh, rserder.said)
         rseal = dict(i=rseal.i, s=rseal.s, d=rseal.d)
 
-        if hab.mhab is None:
+        if not hab.group:
             if registry.estOnly:
                 hab.rotate(data=[rseal])
             else:
@@ -735,13 +740,16 @@ class Credentialer(doing.DoDoer):
         Args:
             creder (Creder): Credential object to issue
             smids (list[str] | None): optional group signing member ids for multisig
+                need to contributed current signing key
             rmids (list[str] | None): optional group rotating member ids for multisig
+                need to contribute digest of next rotating key
         """
         regk = creder.crd["ri"]
         registry = self.rgy.regs[regk]
         hab = registry.hab
-        smids = smids if smids is not None else hab.smids
-        rmids = rmids if rmids is not None else hab.rmids
+        if hab.group:
+            smids = smids if smids is not None else hab.smids
+            rmids = rmids if rmids is not None else hab.rmids
 
         dt = creder.subject["dt"] if "dt" in creder.subject else None
 
@@ -749,7 +757,7 @@ class Credentialer(doing.DoDoer):
                                          dt=dt, smids=smids, rmids=rmids)
 
         rseq = coring.Seqner(sn=seq)
-        if hab.mhab:
+        if hab.group:
             craw = signing.ratify(hab=hab, serder=creder)
             atc = bytearray(craw[creder.size:])
             others = list(oset(smids + (rmids or [])))
@@ -808,7 +816,7 @@ class Credentialer(doing.DoDoer):
                 recp = creder.subject["i"]
 
                 hab = self.hby.habs[issr]
-                if hab.mhab:
+                if hab.group:
                     sender = hab.mhab.pre
                 else:
                     sender = issr
@@ -960,7 +968,7 @@ def sendCredential(hby, hab, reger, postman, creder, recp):
     Returns:
 
     """
-    if hab.mhab:
+    if hab.group:
         sender = hab.mhab.pre
     else:
         sender = hab.pre
