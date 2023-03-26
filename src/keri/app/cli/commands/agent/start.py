@@ -57,6 +57,7 @@ parser.add_argument("-p", "--path",
 parser.add_argument("--keypath", action="store", required=False, default=None)
 parser.add_argument("--certpath", action="store", required=False, default=None)
 parser.add_argument("--cafilepath", action="store", required=False, default=None)
+parser.add_argument("--debug", action="store_true", required=False, default=False)
 
 
 def launch(args):
@@ -68,7 +69,13 @@ def launch(args):
     Returns:
 
     """
-    help.ogler.level = logging.INFO
+    if args.debug:
+        help.ogler.level = logging.DEBUG
+        help.ogler.resetLevel(level=logging.DEBUG)
+        print("DEBUG enabled\n")
+    else:
+        help.ogler.level = logging.INFO
+        # help.ogler.resetLevel(level=logging.INFO)
     help.ogler.reopen(name="keri", temp=True, clear=True)
 
     print("\n******* Starting agent listening: http/{}, tcp/{} "
