@@ -76,10 +76,12 @@ wait_status_ok "http://localhost:5723/ids"
 # agent-5623 
 curl -s -X POST "http://localhost:5623/ids/agent-5623" -H "accept: */*" -H "Content-Type: application/json" -d "{\"transferable\":true,\"wits\":[${wits}],\"toad\":${toad},\"icount\":1,\"ncount\":1,\"isith\":1,\"nsith\":1}" | jq
 wait_receipts "http://localhost:5623/ids/agent-5623" $toad
+wait_status_ok "http://127.0.0.1:5642/oobi/${agent5623}/witness/${wan}"
 
 # agent-5723 
 curl -s -X POST "http://localhost:5723/ids/agent-5723" -H "accept: */*" -H "Content-Type: application/json" -d "{\"transferable\":true,\"wits\":[${wits}],\"toad\":${toad},\"icount\":1,\"ncount\":1,\"isith\":1,\"nsith\":1}" | jq
 wait_receipts "http://localhost:5723/ids/agent-5723" $toad
+wait_status_ok "http://127.0.0.1:5642/oobi/${agent5723}/witness/${wan}"
 
 #sleep 0.5
 
