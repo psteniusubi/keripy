@@ -57,7 +57,8 @@ def setupWitness(hby, alias="witness", mbx=None, aids=None, tcpPort=5631, httpPo
     clienter = httping.Clienter()
     oobiery = keri.app.oobiing.Oobiery(hby=hby, clienter=clienter)
 
-    app = falcon.App(cors_enable=True)
+    app = falcon.App()
+    app.add_middleware(httping.HandleCORS())
     ending.loadEnds(app=app, hby=hby, default=hab.pre)
     oobiing.loadEnds(app=app, hby=hby, prefix="/ext")
     rep = storing.Respondant(hby=hby, mbx=mbx, aids=aids)
